@@ -225,6 +225,9 @@ export async function createOrder(
 
         const created = await tx.order.create({
           data: {
+            address: data.address,
+            city: data.city,
+            phone: data.phone,
             userId,
             total,
             items: { create: itemsData },
