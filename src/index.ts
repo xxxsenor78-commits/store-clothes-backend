@@ -16,16 +16,29 @@ const allowedOrigins = (process.env.CORS_ORIGINS ?? "")
   .map((o) => o.trim())
   .filter(Boolean);
 
+const isDevelopment = process.env.NODE_ENV !== "production";
+
 app.use(helmet());
 app.use(
   cors({
     origin(origin, callback) {
       // Peticiones sin origin (curl, apps móviles, health checks) se permiten.
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) {
         return callback(null, true);
       }
+
+      // Si no hay lista configurada, permitimos localhost y dev tools en entorno local.
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      if (isDevelopment && allowedOrigins.length === 0) {
+        return callback(null, true);
+      }
+
       callback(new Error("Not allowed by CORS"));
     },
+    credentials: true,
   })
 );
 app.use(morgan("dev"));
